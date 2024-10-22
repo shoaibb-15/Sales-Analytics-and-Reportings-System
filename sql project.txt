@@ -1,0 +1,149 @@
+
+SQL> CREATE TABLE Customers (
+  2      customer_id NUMBER PRIMARY KEY,
+  3      customer_name VARCHAR2(100),
+  4      email VARCHAR2(100),
+  5      phone_number VARCHAR2(15),
+  6      address VARCHAR2(255)
+  7  );
+
+Table created.
+
+SQL> CREATE TABLE Categories (
+  2      category_id NUMBER PRIMARY KEY,
+  3      category_name VARCHAR2(100));
+
+Table created.
+
+SQL> CREATE TABLE Products (
+  2      product_id NUMBER PRIMARY KEY,
+  3      product_name VARCHAR2(100),
+  4      category_id NUMBER,
+  5      price NUMBER(10, 2),
+  6      stock_quantity NUMBER,
+  7      FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+  8  );
+
+Table created.
+
+SQL> CREATE TABLE Employees (
+  2      employee_id NUMBER PRIMARY KEY,
+  3      employee_name VARCHAR2(100),
+  4      position VARCHAR2(50)
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE Sales (
+  2      sale_id NUMBER PRIMARY KEY,
+  3      customer_id NUMBER,
+  4      product_id NUMBER,
+  5      employee_id NUMBER,
+  6      sale_date DATE,
+  7      quantity NUMBER,
+  8      total_amount NUMBER(10, 2),
+  9      FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+ 10      FOREIGN KEY (product_id) REFERENCES Products(product_id),
+ 11      FOREIGN KEY (employee_id) REFERENCES Employees(employee_id)
+ 12  );
+
+Table created.
+
+SQL> INSERT INTO Categories (category_id, category_name) VALUES (1, 'Electronics');
+
+1 row created.
+
+SQL> INSERT INTO Categories (category_id, category_name) VALUES (2, 'Apparel');
+
+1 row created.
+
+SQL> INSERT INTO Products (product_id, product_name, category_id, price, stock_quantity)
+  2  VALUES (1, 'Smartphone', 1, 599.99, 50);
+
+1 row created.
+
+SQL> INSERT INTO Products (product_id, product_name, category_id, price, stock_quantity)
+  2  VALUES (2, 'Laptop', 1, 999.99, 30);
+
+1 row created.
+
+SQL> INSERT INTO Customers (customer_id, customer_name, email, phone_number, address)
+  2  VALUES (1, 'John Doe', 'johndoe@example.com', '1234567890', '123 Main St');
+
+1 row created.
+
+SQL> INSERT INTO Customers (customer_id, customer_name, email, phone_number, address)
+  2  VALUES (2, 'Jane Smith', 'janesmith@example.com', '0987654321', '456 Elm St');
+
+1 row created.
+
+SQL> INSERT INTO Employees (employee_id, employee_name, position)
+  2  VALUES (1, 'Alice Johnson', 'Sales Manager');
+
+1 row created.
+
+SQL> INSERT INTO Employees (employee_id, employee_name, position)
+  2  VALUES (2, 'Bob Williams', 'Sales Rep');
+
+1 row created.
+
+SQL> INSERT INTO Sales (sale_id, customer_id, product_id, employee_id, sale_date, quantity, total_amount)
+  2  VALUES (1, 1, 1, 2, TO_DATE('2023-10-10', 'YYYY-MM-DD'), 2, 1199.98);
+
+1 row created.
+
+SQL> INSERT INTO Sales (sale_id, customer_id, product_id, employee_id, sale_date, quantity, total_amount)
+  2  VALUES (2, 2, 2, 1, TO_DATE('2023-10-12', 'YYYY-MM-DD'), 1, 999.99);
+
+1 row created.
+
+SQL> set pages100 lines100;
+SQL> SELECT product_name, SUM(quantity) AS total_sold
+  2  FROM Sales
+  3  JOIN Products ON Sales.product_id = Products.product_id
+  4  GROUP BY product_name
+  5  ORDER BY total_sold DESC;
+
+PRODUCT_NAME
+----------------------------------------------------------------------------------------------------
+TOTAL_SOLD
+----------
+Smartphone
+         2
+
+Laptop
+         1
+
+
+SQL> set pages1000 lines10000;
+SQL> SELECT product_name, SUM(quantity) AS total_sold
+  2  FROM Sales
+  3  JOIN Products ON Sales.product_id = Products.product_id
+  4  GROUP BY product_name
+  5  ORDER BY total_sold DESC;
+
+PRODUCT_NAME                                                                                         TOTAL_SOLD
+---------------------------------------------------------------------------------------------------- ----------
+Smartphone                                                                                                    2
+Laptop                                                                                                        1
+
+SQL> SELECT TO_CHAR(sale_date, 'YYYY-MM') AS month, SUM(total_amount) AS monthly_sales
+  2  FROM Sales
+  3  GROUP BY TO_CHAR(sale_date, 'YYYY-MM')
+  4  ORDER BY month;
+
+MONTH   MONTHLY_SALES
+------- -------------
+2023-10       2199.97
+
+SQL> SELECT category_name, SUM(total_amount) AS total_sales
+  2  FROM Sales
+  3  JOIN Products ON Sales.product_id = Products.product_id
+  4  JOIN Categories ON Products.category_id = Categories.category_id
+  5  GROUP BY category_name
+  6  ORDER BY total_sales DESC;
+
+CATEGORY_NAME                                                                                        TOTAL_SALES
+---------------------------------------------------------------------------------------------------- -----------
+Electronics                                                                                              2199.97
+
